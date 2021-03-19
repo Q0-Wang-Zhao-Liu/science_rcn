@@ -2,15 +2,15 @@
 Reference implementation of a two-level RCN model for MNIST classification experiments.
 
 Examples:
-- To run a small unit test that trains and tests on 20 images using one CPU 
+- To run a small unit test that trains and tests on 20 images using one CPU
   (takes ~2 minutes, accuracy is ~60%):
 python science_rcn/run.py
 
-- To run a slightly more interesting experiment that trains on 100 images and tests on 20 
+- To run a slightly more interesting experiment that trains on 100 images and tests on 20
   images using multiple CPUs (takes <1 min using 7 CPUs, accuracy is ~90%):
 python science_rcn/run.py --train_size 100 --test_size 20 --parallel
 
-- To test on the full 10k MNIST test set, training on 1000 examples 
+- To test on the full 10k MNIST test set, training on 1000 examples
 (could take hours depending on the number of available CPUs, average accuracy is ~97.7+%):
 python science_rcn/run.py --full_test_set --train_size 1000 --parallel --pool_shape 25 --perturb_factor 2.0
 """
@@ -21,8 +21,10 @@ import numpy as np
 import os
 from multiprocessing import Pool
 from functools import partial
-from scipy.misc import imresize
-from scipy.ndimage import imread
+from skimage import transform
+#from scipy.misc import imresize
+import imageio
+# from scipy.ndimage import imread
 
 from science_rcn.inference import test_image
 from science_rcn.learning import train_image
@@ -39,7 +41,7 @@ def run_experiment(data_dir='data/MNIST',
                    parallel=True,
                    verbose=False,
                    seed=5):
-    """Run MNIST experiments and evaluate results. 
+    """Run MNIST experiments and evaluate results.
 
     Parameters
     ----------
@@ -60,7 +62,7 @@ def run_experiment(data_dir='data/MNIST',
         Higher verbosity level.
     seed : int
         Random seed used by numpy.random for sampling training set.
-    
+
     Returns
     -------
     model_factors : ([numpy.ndarray], [numpy.ndarray], [networkx.Graph])
@@ -144,7 +146,8 @@ def get_mnist_data_iters(data_dir, train_size, test_size,
             for fname in samples:
                 filepath = os.path.join(cat_path, fname)
                 # Resize and pad the images to (200, 200)
-                image_arr = imresize(imread(filepath), (112, 112))
+                imread_output = imageio.imread(filepath)
+                image_arr = transform.resize(imread_output, (112, 112))
                 img = np.pad(image_arr,
                              pad_width=tuple([(p, p) for p in (44, 44)]),
                              mode='constant', constant_values=0)

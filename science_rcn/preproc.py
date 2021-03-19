@@ -39,7 +39,7 @@ class Preproc(object):
         self.num_orients = num_orients
         self.filter_scale = filter_scale
         self.cross_channel_pooling = cross_channel_pooling
-        self.suppression_masks = generate_suppression_masks(filter_scale=filter_scale, 
+        self.suppression_masks = generate_suppression_masks(filter_scale=filter_scale,
                                                             num_orients=num_orients)
 
     def fwd_infer(self, img, brightness_diff_threshold=40.):
@@ -55,7 +55,7 @@ class Preproc(object):
         Returns
         -------
         bu_msg : 3D numpy.ndarray of float
-            The bottom-up messages from the preprocessing layer. 
+            The bottom-up messages from the preprocessing layer.
             Shape is (num_feats, rows, cols)
         """
         filtered = np.zeros((len(self.filters),) + img.shape, dtype=np.float32)
@@ -143,7 +143,7 @@ def generate_suppression_masks(filter_scale=4., num_orients=16):
 
 def local_nonmax_suppression(filtered, suppression_masks, num_orients=16):
     """
-    Apply oriented non-max suppression to the filters, so that only a single 
+    Apply oriented non-max suppression to the filters, so that only a single
     orientated edge is active at a pixel. See Preproc for additional parameters.
 
     Parameters

@@ -72,7 +72,7 @@ def sparsify(bu_msg, suppress_radius=3):
         if not img[r, c]:
             break
         frcs.append((bu_msg[:, r, c].argmax(), r, c))
-        img[r - suppress_radius:r + suppress_radius + 1, 
+        img[r - suppress_radius:r + suppress_radius + 1,
             c - suppress_radius:c + suppress_radius + 1] = False
     return np.array(frcs)
 
@@ -120,13 +120,13 @@ def add_underconstraint_edges(frcs,
                               max_cxn_length=100,
                               tolerance=4):
     """Examines all pairs of variables and greedily adds pairwise constraints
-    until the pool flexibility matches the desired amount of flexibility specified by 
+    until the pool flexibility matches the desired amount of flexibility specified by
     perturb_factor and tolerance.
 
     Parameters
     ----------
     frcs : numpy.ndarray of numpy.int
-        Nx3 array of (feature idx, row, column), where each row represents a 
+        Nx3 array of (feature idx, row, column), where each row represents a
         single pool center.
     perturb_factor : float
         How much two points are allowed to vary on average given the distance
@@ -134,7 +134,7 @@ def add_underconstraint_edges(frcs,
     max_cxn_length : int
         The maximum radius to consider adding laterals.
     tolerance : float
-        How much relative error to tolerate in how much two points vary relative to each 
+        How much relative error to tolerate in how much two points vary relative to each
         other.
 
     Returns
@@ -168,7 +168,7 @@ def add_underconstraint_edges(frcs,
 def adjust_edge_perturb_radii(frcs,
                               graph,
                               perturb_factor=2):
-    """Returns a new graph where the 'perturb_radius' has been adjusted to account for 
+    """Returns a new graph where the 'perturb_radius' has been adjusted to account for
     rounding errors. See train_image for parameters and returns.
     """
     graph = graph.copy()
