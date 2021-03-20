@@ -8,13 +8,23 @@ import networkx as nx
 from scipy.spatial import distance, cKDTree
 
 from science_rcn.preproc import Preproc
+import os
+import matplotlib.pyplot as plt
+
+def save_plot(full_path, image_2D):
+    if not os.path.exists(full_path):
+        fig, ax = plt.subplots()
+        plt.imshow(image_2D)
+        plt.colorbar()
+        plt.savefig(full_path, bbox_inches='tight')
+        plt.close(fig)
 
 LOG = logging.getLogger(__name__)
 
 ModelFactors = namedtuple('ModelFactors', 'frcs edge_factors graph')
 
 
-def train_image(img, perturb_factor=2.):
+def train_image(train_data, perturb_factor=2.):
     """Main function for training on one image.
 
     Parameters
@@ -40,15 +50,17 @@ def train_image(img, perturb_factor=2.):
     """
     # Pre-processing layer (cf. Sec 4.2.1)
     preproc_layer = Preproc()
-    bu_msg = preproc_layer.fwd_infer(img)
+    bu_msg, label = preproc_layer.fwd_infer(train_data)
+    print("0 bu_msg.shape={}".format(bu_msg.shape))
     # Sparsification (cf. Sec 5.1.1)
-    frcs = sparsify(bu_msg)
+    frcs = sparsify(bu_msg, 3, label)
+    print("1 frcs.shape={}".format(frcs.shape))
     # Lateral learning (cf. 5.2)
     graph, edge_factors = learn_laterals(frcs, bu_msg, perturb_factor=perturb_factor)
     return ModelFactors(frcs, edge_factors, graph)
 
-
-def sparsify(bu_msg, suppress_radius=3):
+MAIN_PATH = "/Users/qliu/Documents/science_rcn/science_rcn"
+def sparsify(bu_msg, suppress_radius, label):
     """Make a sparse representation of the edges by greedily selecting features from the
     output of preprocessing layer and suppressing overlapping activations.
 
@@ -67,11 +79,21 @@ def sparsify(bu_msg, suppress_radius=3):
     """
     frcs = []
     img = bu_msg.max(0) > 0
+
+    full_path = MAIN_PATH + "/GVM/train_image_function/sparsify/label={}/".format(label)
+    if not os.path.exists(full_path):
+        os.makedirs(full_path)
+    save_plot(full_path + "before.png", img)
     while True:
         r, c = np.unravel_index(img.argmax(), img.shape)
+        print("r={},c={}".format(r, c))
         if not img[r, c]:
             break
-        frcs.append((bu_msg[:, r, c].argmax(), r, c))
+
+        all_x_specific_yz_in_image_2D_as_1D = bu_msg[:, r, c]
+        print("all_x_specific_yz_in_image_2D_as_1D.shape={}".format(all_x_specific_yz_in_image_2D_as_1D.shape))
+        landmark_feature_rol_col = (all_x_specific_yz_in_image_2D_as_1D.argmax(), r, c)
+        frcs.append(landmark_feature_rol_col)
         img[r - suppress_radius:r + suppress_radius + 1,
             c - suppress_radius:c + suppress_radius + 1] = False
     return np.array(frcs)
@@ -86,6 +108,7 @@ def learn_laterals(frcs, bu_msg, perturb_factor, use_adjaceny_graph=False):
         graph = adjust_edge_perturb_radii(frcs, graph, perturb_factor=perturb_factor)
     else:
         graph = nx.Graph()
+        print("frcs.shape[0]={}".format(frcs.shape[0]))
         graph.add_nodes_from(range(frcs.shape[0]))
 
     graph = add_underconstraint_edges(frcs, graph, perturb_factor=perturb_factor)
@@ -142,6 +165,7 @@ def add_underconstraint_edges(frcs,
     graph : see train_image.
     """
     graph = graph.copy()
+    print("frcs.shape={}".format(frcs.shape))
     f1_bus_tree = cKDTree(frcs[:, 1:])
 
     close_pairs = np.array(list(f1_bus_tree.query_pairs(r=max_cxn_length)))

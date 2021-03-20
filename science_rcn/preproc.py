@@ -42,7 +42,7 @@ class Preproc(object):
         self.suppression_masks = generate_suppression_masks(filter_scale=filter_scale,
                                                             num_orients=num_orients)
 
-    def fwd_infer(self, img, brightness_diff_threshold=40.):
+    def fwd_infer(self, train_data, brightness_diff_threshold=40., background_threshold=.001):
         """Compute bottom-up (forward) inference.
 
         Parameters
@@ -58,13 +58,15 @@ class Preproc(object):
             The bottom-up messages from the preprocessing layer.
             Shape is (num_feats, rows, cols)
         """
+        img = train_data[0]
+        label = train_data[1]
         filtered = np.zeros((len(self.filters),) + img.shape, dtype=np.float32)
         for i, kern in enumerate(self.filters):
             filtered[i] = fftconvolve(img, kern, mode='same')
         localized = local_nonmax_suppression(filtered, self.suppression_masks)
         # Threshold and binarize
         localized *= (filtered / brightness_diff_threshold).clip(0, 1)
-        localized[localized < 1] = 0
+        localized[localized < background_threshold] = 0
 
         if self.cross_channel_pooling:
             pooled_channel_weights = [(0, 1), (-1, 1), (1, 1)]
@@ -81,7 +83,7 @@ class Preproc(object):
             bu_msg = localized
         # Setting background to -1
         bu_msg[bu_msg == 0] = -1.
-        return bu_msg
+        return bu_msg, label
 
     @property
     def filters(self):
