@@ -83,7 +83,7 @@ def run_experiment(data_dir='data/MNIST',
     train_partial = partial(train_image,
                             perturb_factor=perturb_factor)
     train_results = pool.map_async(train_partial, train_data).get(9999999)
-    all_model_factors = list(zip(*train_results[0]))
+    all_model_factors = list(zip(*train_results))
 
     LOG.info("Testing on {} images...".format(len(test_data)))
     test_partial = partial(test_image, model_factors=all_model_factors,
