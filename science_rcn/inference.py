@@ -54,8 +54,8 @@ def test_image(test_data, model_factors,
     bu_msg = preproc_layer.fwd_infer(test_data)
 
     # Forward pass inference
-    fp_scores = np.zeros(len(model_factors))
-    #print("model_factors={}".format(model_factors))
+    fp_scores = np.zeros(len(model_factors[0]))
+    print("fp_scores={}".format(fp_scores))
     for i, (frcs, _, graph) in enumerate(list(zip(*model_factors))):
         fp_scores[i] = forward_pass(frcs,
                                     bu_msg,
