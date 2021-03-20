@@ -52,18 +52,17 @@ def test_image(test_data, model_factors,
     # Get bottom-up messages from the pre-processing layer
     preproc_layer = Preproc(cross_channel_pooling=True)
     bu_msg, label = preproc_layer.fwd_infer(test_data)
-    print("inference bu_msg.shape={}".format(bu_msg.shape))
+    #print("inference bu_msg.shape={}".format(bu_msg.shape))
 
     # Forward pass inference
     fp_scores = np.zeros(len(model_factors[0]))
-    print("fp_scores={}".format(fp_scores))
     for i, (frcs, _, graph) in enumerate(list(zip(*model_factors))):
         fp_scores[i] = forward_pass(frcs,
                                     bu_msg,
                                     graph,
                                     pool_shape)
     top_candidates = np.argsort(fp_scores)[-num_candidates:]
-
+    print("fp_scores={}".format(fp_scores))
     # Backward pass inference
     winner_idx, winner_score = (-1, -np.inf)  # (training feature idx, score)
     for idx in top_candidates:

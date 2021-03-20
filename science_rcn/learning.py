@@ -140,7 +140,7 @@ def make_adjacency_graph(frcs, bu_msg, max_dist=3):
 def add_underconstraint_edges(frcs,
                               graph,
                               perturb_factor=2.,
-                              max_cxn_length=100,
+                              max_cxn_length=15,
                               tolerance=4):
     """Examines all pairs of variables and greedily adds pairwise constraints
     until the pool flexibility matches the desired amount of flexibility specified by
