@@ -170,14 +170,14 @@ if __name__ == '__main__':
         '--train_size',
         dest='train_size',
         type=int,
-        default=20,
+        default=10,
         help="Number of training examples.",
     )
     parser.add_argument(
         '--test_size',
         dest='test_size',
         type=int,
-        default=20,
+        default=10,
         help="Number of testing examples.",
     )
     parser.add_argument(
