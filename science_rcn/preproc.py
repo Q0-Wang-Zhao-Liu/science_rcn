@@ -79,6 +79,7 @@ class Preproc(object):
                         pos_chan[pos_chan > 0] *= factor
                     np.maximum(pc, pos_chan, pc)
             bu_msg = np.array(pooled_channels)
+            print("bu_msg.shape={}".format(bu_msg.shape))
         else:
             bu_msg = localized
         # Setting background to -1

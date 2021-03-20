@@ -51,7 +51,8 @@ def test_image(test_data, model_factors,
     """
     # Get bottom-up messages from the pre-processing layer
     preproc_layer = Preproc(cross_channel_pooling=True)
-    bu_msg = preproc_layer.fwd_infer(test_data)
+    bu_msg, label = preproc_layer.fwd_infer(test_data)
+    print("inference bu_msg.shape={}".format(bu_msg.shape))
 
     # Forward pass inference
     fp_scores = np.zeros(len(model_factors[0]))
