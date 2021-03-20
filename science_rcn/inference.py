@@ -16,6 +16,8 @@ from science_rcn.preproc import Preproc
 
 LOG = logging.getLogger(__name__)
 
+from science_rcn.constants import MAIN_PATH, save_plot
+import os
 
 class RCNInferenceError(Exception):
     """Raise for general errors in RCN inference."""
@@ -60,9 +62,11 @@ def test_image(test_data, model_factors,
         fp_scores[i] = forward_pass(frcs,
                                     bu_msg,
                                     graph,
-                                    pool_shape)
+                                    pool_shape,
+                                    i,
+                                    label)
+    print("label={} fp_scores={}".format(label, fp_scores))
     top_candidates = np.argsort(fp_scores)[-num_candidates:]
-    print("fp_scores={}".format(fp_scores))
     # Backward pass inference
     winner_idx, winner_score = (-1, -np.inf)  # (training feature idx, score)
     for idx in top_candidates:
@@ -75,7 +79,7 @@ def test_image(test_data, model_factors,
     return winner_idx, winner_score
 
 
-def forward_pass(frcs, bu_msg, graph, pool_shape):
+def forward_pass(frcs, bu_msg, graph, pool_shape, i, label):
     """
     Forward pass inference using a tree-approximation (cf. Sec S4.2).
 
@@ -128,8 +132,19 @@ def forward_pass(frcs, bu_msg, graph, pool_shape):
             incoming_msgs[target] += msg_in
         else:
             incoming_msgs[target] = msg_in
+
+    slice_input_image = bu_msg[_pool_slice(*frcs[tree_schedule[-1, 1]])]
+    RELATIVE_PATH = "/science_rcn/GVM/test_image_function/forward_pass/slice_input_image/"
+    full_path = MAIN_PATH + RELATIVE_PATH + \
+        "label={}_i={}.png".format(label, i)
+    save_plot(full_path, slice_input_image)
+
+    RELATIVE_PATH_2 = "/science_rcn/GVM/test_image_function/forward_pass/incoming_messages/"
+    full_path = MAIN_PATH + RELATIVE_PATH_2 + \
+        "label={}_i={}.png".format(label, i)
+    save_plot(full_path, incoming_msgs[tree_schedule[-1, 1]])
     fp_score = np.max(incoming_msgs[tree_schedule[-1, 1]] +
-                      bu_msg[_pool_slice(*frcs[tree_schedule[-1, 1]])])
+                      slice_input_image)
     return fp_score
 
 
