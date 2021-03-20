@@ -22,15 +22,15 @@ class RCNInferenceError(Exception):
     pass
 
 
-def test_image(img, model_factors,
+def test_image(test_data, model_factors,
                pool_shape=(25, 25), num_candidates=20, n_iters=300, damping=1.0):
     """
     Main function for testing on one image.
 
     Parameters
     ----------
-    img : 2D numpy.ndarray
-        The testing image.
+    test_data : [(2D numpy.ndarray, label), (2D numpy.ndarray, label), ...]
+                The testing image & label
     model_factors : ([numpy.ndarray], [numpy.ndarray], [networkx.Graph])
         ([frcs], [edge_factors], [graphs]), output of train_image in learning.py.
     pool_shape : (int, int)
@@ -51,7 +51,7 @@ def test_image(img, model_factors,
     """
     # Get bottom-up messages from the pre-processing layer
     preproc_layer = Preproc(cross_channel_pooling=True)
-    bu_msg = preproc_layer.fwd_infer(img)
+    bu_msg = preproc_layer.fwd_infer(test_data)
 
     # Forward pass inference
     fp_scores = np.zeros(len(model_factors[0]))

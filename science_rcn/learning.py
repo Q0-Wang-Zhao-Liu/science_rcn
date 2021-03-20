@@ -51,10 +51,10 @@ def train_image(train_data, perturb_factor=2.):
     # Pre-processing layer (cf. Sec 4.2.1)
     preproc_layer = Preproc()
     bu_msg, label = preproc_layer.fwd_infer(train_data)
-    print("0 bu_msg.shape={}".format(bu_msg.shape))
+    #print("bu_msg.shape={}".format(bu_msg.shape))
     # Sparsification (cf. Sec 5.1.1)
     frcs = sparsify(bu_msg, 3, label)
-    print("1 frcs.shape={}".format(frcs.shape))
+    #print("frcs.shape={}".format(frcs.shape))
     # Lateral learning (cf. 5.2)
     graph, edge_factors = learn_laterals(frcs, bu_msg, perturb_factor=perturb_factor)
     return ModelFactors(frcs, edge_factors, graph)
@@ -86,12 +86,12 @@ def sparsify(bu_msg, suppress_radius, label):
     save_plot(full_path + "before.png", img)
     while True:
         r, c = np.unravel_index(img.argmax(), img.shape)
-        print("r={},c={}".format(r, c))
+        #print("r={},c={}".format(r, c))
         if not img[r, c]:
             break
 
         all_x_specific_yz_in_image_2D_as_1D = bu_msg[:, r, c]
-        print("all_x_specific_yz_in_image_2D_as_1D.shape={}".format(all_x_specific_yz_in_image_2D_as_1D.shape))
+        #print("all_x_specific_yz_in_image_2D_as_1D.shape={}".format(all_x_specific_yz_in_image_2D_as_1D.shape))
         landmark_feature_rol_col = (all_x_specific_yz_in_image_2D_as_1D.argmax(), r, c)
         frcs.append(landmark_feature_rol_col)
         img[r - suppress_radius:r + suppress_radius + 1,
@@ -108,7 +108,7 @@ def learn_laterals(frcs, bu_msg, perturb_factor, use_adjaceny_graph=False):
         graph = adjust_edge_perturb_radii(frcs, graph, perturb_factor=perturb_factor)
     else:
         graph = nx.Graph()
-        print("frcs.shape[0]={}".format(frcs.shape[0]))
+        #print("frcs.shape[0]={}".format(frcs.shape[0]))
         graph.add_nodes_from(range(frcs.shape[0]))
 
     graph = add_underconstraint_edges(frcs, graph, perturb_factor=perturb_factor)
@@ -165,7 +165,7 @@ def add_underconstraint_edges(frcs,
     graph : see train_image.
     """
     graph = graph.copy()
-    print("frcs.shape={}".format(frcs.shape))
+    #print("frcs.shape={}".format(frcs.shape))
     f1_bus_tree = cKDTree(frcs[:, 1:])
 
     close_pairs = np.array(list(f1_bus_tree.query_pairs(r=max_cxn_length)))
